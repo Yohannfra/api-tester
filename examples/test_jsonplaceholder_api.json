@@ -71,6 +71,14 @@
       "skip": true,
       "method": "GET",
       "endpoint": "/"
+    },
+    {
+      "name": "Test multiples methods",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "endpoint": "/todos",
+      "response": {
+        "code": 200
+      }
     }
   ]
 }

@@ -21,6 +21,7 @@ METHOD_NAME_TO_FUNCTION = {
     'DELETE': requests.delete,
 }
 
+
 class HttpTester:
     def __init__(self, host: str, test_list: List[object], global_headers: Dict[str, str]):
         self.host = host
@@ -41,6 +42,10 @@ class HttpTester:
             print(f"{stylize('KO', colored.fg('red'))}")
 
     def run(self):
+        # dry run to check tests before running any
+        for test in self.test_list:
+            self.validate_test_content(test)
+
         for test in self.test_list:
             print(f"{test['name']}:", end=' ')
 
@@ -48,17 +53,22 @@ class HttpTester:
                 print(f"{stylize('SKIPPED', colored.fg('orange_4b'))}")
                 continue
 
-            self.nb_tests += 1
-
             # prepare request content
-            method, full_url, params, headers, body = self.prepare_test(test)
+            methods, full_url, params, headers, body = self.prepare_test(test)
 
-            # run request
-            result = METHOD_NAME_TO_FUNCTION[method](
-                full_url, params=params, headers=headers, data=body)
+            if len(methods) > 1:
+                print("")
 
-            # check test result
-            self.check_result(test, result)
+            for method in methods:
+                self.nb_tests += 1
+                if len(methods) > 1:
+                    print(f"  {method}\t", end='')
+
+                # run request
+                result = METHOD_NAME_TO_FUNCTION[method](
+                    full_url, params=params, headers=headers, data=body)
+                # check test result
+                self.check_result(test, result)
 
         self.print_summary()
         return self.nb_tests_failed
@@ -90,15 +100,28 @@ class HttpTester:
         print(f"{count_success} : {stylize('OK', colored.fg('green'))}")
         print(f"{self.nb_tests_failed} : {stylize('KO', colored.fg('red'))}")
 
+    def validate_test_content(self, test):
+        if 'name' not in test:
+            sys.exit("Missing 'name' key in test")
+
+        if 'method' not in test and 'methods' not in test:
+            sys.exit(f"{test['name']}: Missing 'method' or 'methods' key")
+        else:
+            if 'method' in test and 'methods' in test:
+                sys.exit(
+                    f"{test['name']}: A test can't have both 'method' and 'methods' defined")
+
+        if 'endpoint' not in test:
+            sys.exit(f"{test['name']}: Missing 'endpoint' key")
+
     def prepare_test(self, test):
         # method
-        if 'method' not in test:
-            sys.exit("Missing 'method' key in test")
-        method = test['method']
+        if 'methods' in test:
+            methods = test['methods']
+        else:
+            methods = [test['method']]
 
         # url
-        if 'endpoint' not in test:
-            sys.exit("Missing 'endpoint' key in test")
         full_url = self.host + test['endpoint']
 
         # query params
@@ -118,7 +141,7 @@ class HttpTester:
         if 'headers' in test:
             headers = {**self.global_headers, **test['headers']}
 
-        return method, full_url, params, headers, body
+        return methods, full_url, params, headers, body
 
 
 class CliParser:
