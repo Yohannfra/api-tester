@@ -62,7 +62,7 @@ class HttpTester:
             for method in methods:
                 self.nb_tests += 1
                 if len(methods) > 1:
-                    print(f"  {method}\t", end='')
+                    print(f"  {method} ", end='')
 
                 # run request
                 result = METHOD_NAME_TO_FUNCTION[method](
