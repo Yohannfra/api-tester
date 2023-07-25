@@ -10,6 +10,14 @@ $ python3 -m pip install -r requirements.txt
 
 ## Usage
 
+### Run example
+
+```
+$ ./api-tester.py examples/test_jsonplaceholder_api.json
+```
+
+### Cli args
+
 ```bash
 $ ./api-tester.py  -h
 usage: api-tester [-h] [-v {2,1}] [--host HOST] [--headers KEY=VALUE [KEY=VALUE ...]] test_file
