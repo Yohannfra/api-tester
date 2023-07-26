@@ -42,16 +42,19 @@ class HttpTester:
             print(f"{stylize('KO', colored.fg('red'))}")
 
     def run(self):
+        longest_test_name = 15 # default
+
         # check tests before running any
         for path_name, tests in self.test_list.items():
             for test_name, test in tests.items():
+                longest_test_name = max(longest_test_name, len(test_name) + 3)
                 self.validate_test_content(test_name, test)
 
 
         for path_name, tests in self.test_list.items():
             print(path_name)
             for test_name, test in tests.items():
-                print(f" {test_name :<20}{test['method']:<6}\t{'/' if 'endpoint' not in test else test['endpoint']:<20} => ", end="")
+                print(f" {test_name.ljust(longest_test_name)}{test['method']:<6}\t{'/' if 'endpoint' not in test else test['endpoint']:<20} => ", end="")
 
                 if 'skip' in test and test['skip'] == True:
                     print(f"{stylize('SKIPPED', colored.fg('orange_4b'))}")
