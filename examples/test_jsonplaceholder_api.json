@@ -4,81 +4,57 @@
   "headers": {
     "Authorization": ""
   },
-  "tests": [
-    {
-      "name": "Get all todo",
-      "method": "GET",
-      "endpoint": "/todos",
-      "queries": {
-        "limit": 200
+  "paths": {
+    "/posts": {
+      "Create a post": {
+        "method": "POST",
+        "headers": { "charset": "UTF-8", "Content-Type": "application/json" },
+        "body": { "title": "foo", "body": "bar", "userId": 1 },
+        "response": {
+          "code": 201,
+          "content-json-exact": {
+            "id": 101,
+            "title": "foo",
+            "body": "bar",
+            "userId": 1
+          }
+        }
       },
-      "response": {
-        "code": 200,
-        "nb_json_items": 200
-      }
-    },
-    {
-      "name": "Get posts from user",
-      "method": "GET",
-      "endpoint": "/posts",
-      "queries": {
-        "userId": 1
+      "Get posts from user": {
+        "method": "GET",
+        "queries": { "userId": 1 },
+        "response": {
+          "code": 200,
+          "nb_json_items": 10
+        }
       },
-      "response": {
-        "code": 200,
-        "nb_json_items": 10
-      }
-    },
-    {
-      "name": "Delete post",
-      "method": "DELETE",
-      "endpoint": "/posts/1",
-      "response": {
-        "code": 200,
-        "content-json-exact": {}
-      }
-    },
-    {
-      "name": "Create a user",
-      "method": "POST",
-      "endpoint": "/posts",
-      "headers": {
-        "charset": "UTF-8",
-        "Content-Type": "application/json"
-      },
-      "body": {
-        "title": "foo",
-        "body": "bar",
-        "userId": 1
-      },
-      "response": {
-        "code": 201,
-        "content-json-exact": {
-          "id": 101,
-          "title": "foo",
-          "body": "bar",
-          "userId": 1
+      "Delete post": {
+        "method": "DELETE",
+        "endpoint": "/1",
+        "response": {
+          "code": 200,
+          "content-json-exact": {}
         }
       }
     },
-    {
-      "name": "test noting",
-      "method": "GET",
-      "endpoint": "/"
+    "/todos": {
+      "get all todos": {
+        "method": "GET",
+        "queries": { "limit": 200 },
+        "response": {
+          "code": 200,
+          "nb_json_items": 200
+        }
+      }
     },
-    {
-      "name": "Skipped test",
-      "skip": true,
-      "method": "GET",
-      "endpoint": "/"
-    },
-    {
-      "name": "Test multiples methods",
-      "methods": ["GET", "POST", "PUT", "DELETE"],
-      "endpoint": "/todos",
-      "response": {
-        "code": 200
+    "/": {
+      "test nothing": {
+        "method": "GET"
+      },
+      "Skipped test": {
+        "method": "GET",
+        "skip": true
       }
     }
-  ]
+  }
 }

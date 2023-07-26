@@ -42,33 +42,38 @@ class HttpTester:
             print(f"{stylize('KO', colored.fg('red'))}")
 
     def run(self):
-        # dry run to check tests before running any
-        for test in self.test_list:
-            self.validate_test_content(test)
+        # check tests before running any
+        for path_name, tests in self.test_list.items():
+            for test_name, test in tests.items():
+                self.validate_test_content(test_name, test)
 
-        for test in self.test_list:
-            print(f"{test['name']}:", end=' ')
 
-            if 'skip' in test and test['skip'] == True:
-                print(f"{stylize('SKIPPED', colored.fg('orange_4b'))}")
-                continue
+        for path_name, tests in self.test_list.items():
+            print(path_name)
+            for test_name, test in tests.items():
+                print(f" {test_name :<20}{test['method']:<6}\t{'/' if 'endpoint' not in test else test['endpoint']:<20} => ", end="")
 
-            # prepare request content
-            methods, full_url, params, headers, body = self.prepare_test(test)
+                if 'skip' in test and test['skip'] == True:
+                    print(f"{stylize('SKIPPED', colored.fg('orange_4b'))}")
+                    continue
 
-            if len(methods) > 1:
-                print("")
+                # prepare request content
+                methods, full_url, params, headers, body = self.prepare_test(path_name, test)
 
-            for method in methods:
-                self.nb_tests += 1
                 if len(methods) > 1:
-                    print(f"  {method} ", end='')
+                    print("")
 
-                # run request
-                result = METHOD_NAME_TO_FUNCTION[method](
-                    full_url, params=params, headers=headers, data=body)
-                # check test result
-                self.check_result(test, result)
+                for method in methods:
+                    self.nb_tests += 1
+                    if len(methods) > 1:
+                        print(f"  {method} ", end='')
+
+                    # run request
+                    result = METHOD_NAME_TO_FUNCTION[method](
+                        full_url, params=params, headers=headers, data=body)
+                    # check test result
+                    self.check_result(test, result)
+            print("")
 
         self.print_summary()
         return self.nb_tests_failed
@@ -100,21 +105,15 @@ class HttpTester:
         print(f"{count_success} : {stylize('OK', colored.fg('green'))}")
         print(f"{self.nb_tests_failed} : {stylize('KO', colored.fg('red'))}")
 
-    def validate_test_content(self, test):
-        if 'name' not in test:
-            sys.exit("Missing 'name' key in test")
-
+    def validate_test_content(self, name, test):
         if 'method' not in test and 'methods' not in test:
-            sys.exit(f"{test['name']}: Missing 'method' or 'methods' key")
+            sys.exit(f"{name}: Missing 'method' or 'methods' key")
         else:
             if 'method' in test and 'methods' in test:
                 sys.exit(
-                    f"{test['name']}: A test can't have both 'method' and 'methods' defined")
+                    f"{name}: A test can't have both 'method' and 'methods' defined")
 
-        if 'endpoint' not in test:
-            sys.exit(f"{test['name']}: Missing 'endpoint' key")
-
-    def prepare_test(self, test):
+    def prepare_test(self, path_name, test):
         # method
         if 'methods' in test:
             methods = test['methods']
@@ -122,7 +121,11 @@ class HttpTester:
             methods = [test['method']]
 
         # url
-        full_url = self.host + test['endpoint']
+        if 'endpoint' in test:
+            endpoint = test['endpoint']
+        else:
+            endpoint = ""
+        full_url = self.host + path_name + endpoint
 
         # query params
         if 'queries' in test:
@@ -222,9 +225,9 @@ def main() -> None:
         host = cli_args['host']
 
     # get test list
-    if 'tests' not in json_content:
-        sys.exit("Missing 'tests' global key")
-    tests = json_content['tests']
+    if 'paths' not in json_content:
+        sys.exit("Missing 'paths' global key")
+    tests = json_content['paths']
 
     # get headers
     if 'headers' in json_content:
