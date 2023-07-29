@@ -99,6 +99,15 @@ class HttpTester:
         if 'content-json-exact' in test['response'] and json.loads(result.content) != test['response']['content-json-exact']:
             return self.print_test_fail(f"Expected {test['response']['content-json-exact']} but got {json.loads(result.content)}")
 
+        if 'content-json-partial' in test['response']:
+            partial_json = test['response']['content-json-partial']
+            res_json = json.loads(result.content)
+            for key in partial_json.keys():
+                if key not in res_json:
+                    return self.print_test_fail(f"Expected key '{key}' in response but got {res_json}")
+                elif res_json[key] != partial_json[key]:
+                    return self.print_test_fail(f"Invalid key '{key}' value, expected value '{partial_json[key]}' but got '{res_json[key]}'")
+
         print(f"{stylize('OK', colored.fg('green'))}")
 
     def print_summary(self):

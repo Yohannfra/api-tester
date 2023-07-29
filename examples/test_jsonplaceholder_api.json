@@ -20,6 +20,18 @@
           }
         }
       },
+      "Create a post with partial result json": {
+        "method": "POST",
+        "headers": { "charset": "UTF-8", "Content-Type": "application/json" },
+        "body": { "title": "foo", "body": "bar", "userId": 1 },
+        "response": {
+          "code": 201,
+          "content-json-partial": {
+            "title": "foo",
+            "body": "bar"
+          }
+        }
+      },
       "Get posts from user": {
         "method": "GET",
         "queries": { "userId": 1 },
