@@ -99,6 +99,7 @@ class HttpTester:
         if 'content-json-exact' in test['response'] and json.loads(result.content) != test['response']['content-json-exact']:
             return self.print_test_fail(f"Expected {test['response']['content-json-exact']} but got {json.loads(result.content)}")
 
+        # check json partial content (only keys listed in test are checked)
         if 'content-json-partial' in test['response']:
             partial_json = test['response']['content-json-partial']
             res_json = json.loads(result.content)
