@@ -95,6 +95,10 @@ class HttpTester:
         if 'nb_json_items' in test['response'] and len(result.json()) != test['response']['nb_json_items']:
             return self.print_test_fail(f"Expected {test['response']['nb_json_items']} json items but got {len(result.json())}")
 
+        # check string content exact
+        if 'content-string-exact' in test['response'] and result.content.decode() != test['response']['content-string-exact']:
+            return self.print_test_fail(f"Expected '{test['response']['content-string-exact']}' but got '{result.content}'")
+
         # check json content exact
         if 'content-json-exact' in test['response'] and json.loads(result.content) != test['response']['content-json-exact']:
             return self.print_test_fail(f"Expected {test['response']['content-json-exact']} but got {json.loads(result.content)}")
